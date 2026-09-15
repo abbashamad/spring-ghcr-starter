@@ -1,0 +1,32 @@
+name: Docker CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1, Jul 20 2026
+
+      - name: Build Docker image
+        run: docker build -t app:test .
+
+      - name: Run Docker container
+        run: |
+          docker compose up -d
+
+          sleep 20
+
+          curl -f http://localhost:8090/actuator/health || exit 1
+
+          docker compose down
